@@ -65,7 +65,10 @@ class CreateSetCommand(Command):
     index.datasets[self.id] = Dataset(self.id, self.name)
 
   def __str__(self):
-    return "[Create Set {}]".format(self.id)
+    s = "[Create Set {}".format(self.id)
+    if self.name:
+      s = s + " ({})".format(self.name)
+    return s + "]"
 
 @handles("addfiles")
 class AddFilesCommand(Command):

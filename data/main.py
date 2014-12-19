@@ -24,9 +24,34 @@ Commands:
 
 from __future__ import print_function
 
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
 from docopt import docopt
+
+from .index import find_index, Index
 
 def main(argv):
   args = docopt(__doc__, argv=argv[1:])
-  print (args)
+  # Find the data index file
+  index_filename = find_index()
+  if not index_filename:
+    logger.error("Could not find index file")
+    return 1
+  # Open and parse the index
+  with open(find_index(), 'r') as index_file:
+    index = Index(index_file)
+
+  if args["set"]:
+    process_set(args, index)
+  with open(find_index(), 'a') as index_file:
+    index.write(index_file)
   return 0
+
+def process_set(args, index):
+  if args["create"]:
+    index.create_set(name=args["--name"])
+
+  elif args["tag"]:
+    print ("tagh")
