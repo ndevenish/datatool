@@ -14,7 +14,7 @@ class Dataset(object):
     return "{" + self.id + "}"
 
   def __repr__(self):
-    return "<Dataset {}:{} files>".format(self.id, len(self.files))
+    return "<Dataset {}:{} files, [{}]>".format(self.id, len(self.files), ",".join(self.tags))
 
 
 class Datafile(object):

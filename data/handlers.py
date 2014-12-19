@@ -56,7 +56,10 @@ class CreateSetCommand(Command):
   def from_data(cls, data):
     return cls(data["id"], data.get("name"))
   def to_data(self):
-    return {"id": self.id, "name":self.name}
+    data = {"id": self.id}
+    if self.name:
+      data["name"] = self.name
+    return data
   def apply(self, index):
     assert not self.id in index.datasets
     index.datasets[self.id] = Dataset(self.id, self.name)
@@ -104,3 +107,12 @@ class AddTagsCommand(Command):
     dataset.tags = dataset.tags.union(self.tags)
   def __str__(self):
     return "[Add tags {{{}}} to set {}]".format(", ".join(self.tags), self.dataset_id)
+
+@handles("removetags")
+class RemoveTagsCommand(AddTagsCommand):
+  command = "removetags"
+  def apply(self, index):
+    dataset = index.datasets[self.dataset_id]
+    dataset.tags = dataset.tags.difference(self.tags)
+  def __str__(self):
+    return "[Remove tags {{{}}} from set {}]".format(", ".join(self.tags), self.dataset_id)

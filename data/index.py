@@ -81,14 +81,14 @@ class Index(object):
     cmd = self._apply_command(CreateSetCommand(name=name))
     return cmd.id
 
-  def write(self, stream=None):
-    """Writes any changes to the original stream file, or the specified one"""
-    stream = stream or self._stream
+  def write(self, stream):
+    """Writes any changes to a specified stream"""
     # Get the last byte and make sure it is a return. Otherwise, push one out
     stream.seek(-1,os.SEEK_END)
     if not stream.read(1) == '\n':
       stream.write('\n')
-    # Now dump all the commands
+    stream.seek(0,os.SEEK_END)
+    # Now dump all the commands that are unprocessed
     for command in self._commands[self._streamindex:]:
       line = "{} {} {}\n".format(command.timestamp.isoformat(), command.command, json.dumps(command.to_data()))
       logger.debug("Writing: " + line)
