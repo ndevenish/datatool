@@ -23,45 +23,46 @@ def find_index():
     if os.path.isfile(loc):
       return loc
 
+
+def parse_index(indexfile):
+  """Read an index file stream and returns the command history"""
+  decoder = json.JSONDecoder()
+  for num, line in enumerate(indexfile, 1):
+    if line.isspace() or line.startswith('#'):
+      continue
+    line_data = reLineHeader.match(line)
+    if not line_data:
+      raise IndexFileError("Could not read index line {}".format(num))
+    command_date, command, raw_data = line_data.groups()
+    # Parse the command
+    data, dlen = decoder.raw_decode(raw_data)
+    if not isinstance(data, dict):
+      data = {'data': data}
+    logger.debug ("Date: {}, Command: {}, Data: {}".format(command_date, command, data))
+    #data['date'] = command_date
+    command = handler_for(command)
+    cmd = command.from_data(data)
+    cmd.timestamp = command_date
+    yield cmd
+
+class IndexFileError(IOError):
+  pass
+
 class IndexData(object):
   """The data object, holding the current state of the index"""
   def __init__(self):
     self.datasets = {}
 
-class IndexFileError(IOError):
-  pass
-
 class Index(object):
   def __init__(self, index_stream=None):
     self._stream = index_stream
-    # Extract the command list to build the index
     self._commands = []
-    # Now apply the parsed commands to the data index
+    # Parse and apply the commands to a fresh data index
     self._data = IndexData()
-    self._process_commands(self._data, self._parse_index(index_stream))
-    # Keep track of commands we have applied vs from the stream
+    self._process_commands(self._data, parse_index(index_stream))
+    # Remember how many commands came from the stream
     self._streamindex = len(self._commands)
 
-  def _parse_index(self, indexfile):
-    """Read an index file and returns the command history"""
-    decoder = json.JSONDecoder()
-    for num, line in enumerate(indexfile, 1):
-      if line.isspace() or line.startswith('#'):
-        continue
-      line_data = reLineHeader.match(line)
-      if not line_data:
-        raise IndexFileError("Could not read index line {}".format(num))
-      command_date, command, raw_data = line_data.groups()
-      # Parse the command
-      data, dlen = decoder.raw_decode(raw_data)
-      if not isinstance(data, dict):
-        data = {'data': data}
-      logger.debug ("Date: {}, Command: {}, Data: {}".format(command_date, command, data))
-      #data['date'] = command_date
-      command = handler_for(command)
-      cmd = command.from_data(data)
-      cmd.timestamp = command_date
-      yield cmd
 
   def _process_commands(self, index_data, commands):
     for command in commands:
