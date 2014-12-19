@@ -130,4 +130,13 @@ class Index(object):
     assert len(results) == 1
     return results[0]
 
+  def __getitem__(self, id):
+    return self._data.datasets[id]
+
+  def search(self, tags):
+    """Retrieve a list of all datasets matching a particular set of tags"""
+    tags = set(tags)
+    data = [x.id for x in self._data.datasets.values() if tags.issubset(x.tags)]
+    return tuple(data)
+
 

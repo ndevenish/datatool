@@ -55,7 +55,12 @@ def main(argv):
     for datafile in dataset.files:
       print (datafile.path)
   elif args["search"]:
-    pass
+    sets = [index[x] for x in index.search(args["<tag>"])]
+    logger.info("{} results".format(len(sets)))
+    max_name = max([len(x.name) for x in sets if x.name] + [0])
+    for dataset in sets:
+      print (dataset.id, dataset.name.ljust(max_name), ",".join(dataset.tags))
+
   elif args["identify"]:
     pass
   # Write any changes to the index
