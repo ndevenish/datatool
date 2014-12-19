@@ -7,5 +7,5 @@ setup(name="data",
       author_email="ndevenish@gmail.com",
       packages=['data'],
       scripts=['bin/data'],
-      requires=["docopt"],
+      requires=["docopt", "python-dateutil"],
      )
