@@ -11,6 +11,8 @@ import dateutil.parser
 import logging
 logger = logging.getLogger(__name__)
 
+from .handlers import handler_for, CreateSetCommand
+
 # Look for a non-blank line 
 reLineHeader = re.compile(r'^\s*([^\s]+)\s+(\w+)\s+(.*)$')
 
@@ -23,19 +25,23 @@ def find_index():
 
 class IndexData(object):
   """The data object, holding the current state of the index"""
-  pass
+  def __init__(self):
+    self.datasets = {}
 
 class IndexFileError(IOError):
   pass
 
 class Index(object):
-  def __init__(self, index_stream):
-    self._parse_index(index_stream)
+  def __init__(self, index_stream=None):
     self._stream = index_stream
+    # Extract the command list to build the index
+    self._commands = []
+    # Now apply the parsed commands to the data index
     self._data = IndexData()
+    self._process_commands(self._data, self._parse_index(index_stream))
 
   def _parse_index(self, indexfile):
-    """Read an index file and builds the database"""
+    """Read an index file and returns the command history"""
     decoder = JSONDecoder()
     for num, line in enumerate(indexfile, 1):
       if line.isspace() or line.startswith('#'):
@@ -43,5 +49,29 @@ class Index(object):
       line_data = reLineHeader.match(line)
       if not line_data:
         raise IndexFileError("Could not read index line {}".format(num))
-      date, command, data = line_data.groups()
-      logger.debug ("Date: {}, Command: {}, Data: {}".format(date, command, data))
+      command_date, command, raw_data = line_data.groups()
+      # Parse the command
+      data, dlen = decoder.raw_decode(raw_data)
+      if not isinstance(data, dict):
+        data = {'data': data}
+      logger.debug ("Date: {}, Command: {}, Data: {}".format(command_date, command, data))
+      #data['date'] = command_date
+      command = handler_for(command)
+      cmd = command.from_data(data)
+      cmd.timestamp = command_date
+      yield cmd
+
+  def _process_commands(self, index_data, commands):
+    for command in commands:
+      self._apply_command(command)
+    print (index_data.datasets)
+
+  def _apply_command(self, command):
+    logger.debug("Applying {}".format(str(command)))
+    self._commands.append(command)
+    command.apply(self._data)    
+
+  def create_set(self, name=None):
+    if name:
+      assert not name in [x.name for x in self._data.datasets.values()]
+    self._apply_command(CreateSetCommand(name=name))
