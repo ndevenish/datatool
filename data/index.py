@@ -11,7 +11,7 @@ import dateutil.parser
 import logging
 logger = logging.getLogger(__name__)
 
-from .handlers import handler_for, CreateSetCommand
+from .handlers import handler_for, CreateSetCommand, SetPropertyCommand
 
 # Look for a non-blank line 
 reLineHeader = re.compile(r'^\s*([^\s]+)\s+(\w+)\s+(.*)$')
@@ -80,6 +80,11 @@ class Index(object):
       assert not name in [x.name for x in self._data.datasets.values()]
     cmd = self._apply_command(CreateSetCommand(name=name))
     return cmd.id
+
+  def rename_set(self, set_id, new_name):
+    #dataset = self._data.datasets[set_id]
+    assert not new_name in [x.name for x in self._data.datasets.values()]
+    self._apply_command(SetPropertyCommand(set_id, "name", new_name))
 
   def write(self, stream):
     """Writes any changes to a specified stream"""

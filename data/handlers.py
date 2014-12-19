@@ -116,3 +116,24 @@ class RemoveTagsCommand(AddTagsCommand):
     dataset.tags = dataset.tags.difference(self.tags)
   def __str__(self):
     return "[Remove tags {{{}}} from set {}]".format(", ".join(self.tags), self.dataset_id)
+
+@handles("setproperty")
+class SetPropertyCommand(Command):
+  def __init__(self, dataset_id, property, value):
+    super(SetPropertyCommand, self).__init__()
+    self.set = dataset_id
+    # Ensure it is a valid property
+    assert property in ["name"]
+    self.property = property
+    self.value = value
+  def apply(self, index):
+    dataset = index.datasets[self.set]
+    if self.property == "name":
+      dataset.name = self.value
+  def __str__(self):
+    return "[Set {} property {} to {}]".format(self.set, self.property, self.value)
+  @classmethod
+  def from_data(cls, data):
+    return cls(data["set"], data["property"], data["value"])
+  def to_data(self):
+    return {"set": self.set, "property": self.property, "value":self.value}
