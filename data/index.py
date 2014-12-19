@@ -11,7 +11,7 @@ from StringIO import StringIO
 logger = logging.getLogger(__name__)
 
 from .handlers import handler_for, CreateSetCommand, SetPropertyCommand, \
-                      AddFilesCommand
+                      AddFilesCommand, AddTagsCommand, RemoveTagsCommand
 from .dataset import Datafile
 
 # Look for a non-blank line 
@@ -100,6 +100,12 @@ class Index(object):
       files.append(Datafile.from_file(filename))
     self._apply_command(AddFilesCommand(set_id, files))
 
+  def add_tags(self, set_id, tags):
+    self._apply_command(AddTagsCommand(set_id, tags))
+
+  def remove_tags(self, set_id, tags):
+    self._apply_command(RemoveTagsCommand(set_id, tags))
+
   def write(self, stream):
     """Writes any changes to a specified stream"""
     # Get the last byte and make sure it is a return. Otherwise, push one out
@@ -117,5 +123,11 @@ class Index(object):
       logger.debug("Writing: " + line.strip())
       stream.write(line)
     self._streamindex = len(self._commands)
+
+  def fetch_dataset(self, name_or_id):
+    """Retrieve a single dataset from either the name, or a shortened (or complete) hash"""
+    results = [y for x, y in self._data.datasets.items() if x.startswith(name_or_id) or y.name == name_or_id]
+    assert len(results) == 1
+    return results[0]
 
 
