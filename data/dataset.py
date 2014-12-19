@@ -1,6 +1,8 @@
 # coding: utf-8
 
+import os
 import uuid
+import hashlib
 
 class Dataset(object):
   def __init__(self, setid=None, name=None):
@@ -23,9 +25,24 @@ class Datafile(object):
     self.shasum = shasum
     self.size = size
     self.timestamp = timestamp
+
   @classmethod
   def from_data(cls, data):
     return cls(**data)
+
+  @classmethod
+  def from_file(cls, filename):
+    stats = os.stat(filename)
+    hasher = hashlib.sha1()
+    with open(filename, 'rb') as ofile:
+      data = ofile.read(4096)
+      while data:
+        hasher.update(data)
+        data = ofile.read(4096)
+
+    return Datafile(filename, shasum=hasher.hexdigest(), 
+                    size=stats.st_size, timestamp=stats.st_mtime)
+
   def to_data(self):
     return {x:y for x, y in {
       "path": self.path,

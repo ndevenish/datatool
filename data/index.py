@@ -10,7 +10,9 @@ import logging
 from StringIO import StringIO
 logger = logging.getLogger(__name__)
 
-from .handlers import handler_for, CreateSetCommand, SetPropertyCommand
+from .handlers import handler_for, CreateSetCommand, SetPropertyCommand, \
+                      AddFilesCommand
+from .dataset import Datafile
 
 # Look for a non-blank line 
 reLineHeader = re.compile(r'^\s*([^\s]+)\s+(\w+)\s+(.*)$')
@@ -90,6 +92,13 @@ class Index(object):
     #dataset = self._data.datasets[set_id]
     assert not new_name in [x.name for x in self._data.datasets.values()]
     self._apply_command(SetPropertyCommand(set_id, "name", new_name))
+
+  def add_files(self, set_id, filenames):
+    # Build the list of files then add them to the dataset
+    files = []
+    for filename in [os.path.abspath(os.path.expanduser(x)) for x in filenames]:
+      files.append(Datafile.from_file(filename))
+    self._apply_command(AddFilesCommand(set_id, files))
 
   def write(self, stream):
     """Writes any changes to a specified stream"""

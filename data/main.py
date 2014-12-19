@@ -5,6 +5,7 @@
 Usage:
   data set create [--name=<name>] [<file>...]
   data set tag [--delete] <name-or-id> <tag> [<tag>...]
+  data add <name-or-id> <file> [<file>...]
   data files <name-or-id>
   data search <tag> [<tag>...]
   data identify <file> [<file>...]
@@ -17,6 +18,7 @@ Commands:
   set         Manipulate and create data sets
   set create  Create a new data set, optionally named and with a list of files
   set tag     Add a tag (or list of tags) to a dataset
+  add         Add a set of files to a dataset
   files       Retrieve the file list for a specific data set
   search      Find a list of dataset names matching a list of tags
   identify    Find any datasets containing any given files
@@ -47,11 +49,13 @@ def main(argv):
     process_set(args, index)
   with open(find_index(), 'a') as index_file:
     index.write(index_file)
+  print (args)
   return 0
 
 def process_set(args, index):
   if args["create"]:
-    index.create_set(name=args["--name"])
-
+    set_id = index.create_set(name=args["--name"])
+    if args["<file>"]:
+      index.add_files(set_id, args["<file>"])
   elif args["tag"]:
     print ("tagh")
