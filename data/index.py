@@ -6,7 +6,7 @@ from __future__ import print_function
 
 import os
 import re
-from json import JSONDecoder
+import json
 import dateutil.parser
 import logging
 logger = logging.getLogger(__name__)
@@ -39,10 +39,12 @@ class Index(object):
     # Now apply the parsed commands to the data index
     self._data = IndexData()
     self._process_commands(self._data, self._parse_index(index_stream))
+    # Keep track of commands we have applied vs from the stream
+    self._streamindex = len(self._commands)
 
   def _parse_index(self, indexfile):
     """Read an index file and returns the command history"""
-    decoder = JSONDecoder()
+    decoder = json.JSONDecoder()
     for num, line in enumerate(indexfile, 1):
       if line.isspace() or line.startswith('#'):
         continue
@@ -69,9 +71,28 @@ class Index(object):
   def _apply_command(self, command):
     logger.debug("Applying {}".format(str(command)))
     self._commands.append(command)
-    command.apply(self._data)    
+    command.apply(self._data)   
+    return command 
 
   def create_set(self, name=None):
+    """Create a (optionally named) data set and return the id"""
     if name:
       assert not name in [x.name for x in self._data.datasets.values()]
-    self._apply_command(CreateSetCommand(name=name))
+    cmd = self._apply_command(CreateSetCommand(name=name))
+    return cmd.id
+
+  def write(self, stream=None):
+    """Writes any changes to the original stream file, or the specified one"""
+    stream = stream or self._stream
+    # Get the last byte and make sure it is a return. Otherwise, push one out
+    stream.seek(-1,os.SEEK_END)
+    if not stream.read(1) == '\n':
+      stream.write('\n')
+    # Now dump all the commands
+    for command in self._commands[self._streamindex:]:
+      line = "{} {} {}\n".format(command.timestamp.isoformat(), command.command, json.dumps(command.to_data()))
+      logger.debug("Writing: " + line)
+      stream.write(line)
+    self._streamindex = len(self._commands)
+
+
