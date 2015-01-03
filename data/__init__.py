@@ -1,2 +1,2 @@
 
-from .index import Index
+from .authority import LocalFileAuthority, find_authority

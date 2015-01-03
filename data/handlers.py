@@ -7,7 +7,8 @@ logger = logging.getLogger(__name__)
 
 import dateutil.parser
 
-from .dataset import Dataset, Datafile
+from .dataset import Dataset
+from .datafile import DataFile
 
 _HANDLERS = {}
 
@@ -47,51 +48,50 @@ class Command(object):
   
 @handles("createset")
 class CreateSetCommand(Command):
-  def __init__(self, cid=None, name=None):
+  def __init__(self, cid=None):
     super(CreateSetCommand, self).__init__()
     self.id = cid or uuid.uuid4().hex
-    self.name = name 
-
   @classmethod
   def from_data(cls, data):
-    return cls(data["id"], data.get("name"))
+    return cls(data["id"])
   def to_data(self):
-    data = {"id": self.id}
-    if self.name:
-      data["name"] = self.name
-    return data
+    return {"id": self.id}
   def apply(self, index):
     assert not self.id in index.datasets
-    index.datasets[self.id] = Dataset(self.id, self.name)
-
+    index.datasets[self.id] = Dataset(self.id)
   def __str__(self):
-    s = "[Create Set {}".format(self.id)
-    if self.name:
-      s = s + " ({})".format(self.name)
-    return s + "]"
+    return "[Create Set {}]".format(self.id)
 
-@handles("addfiles")
-class AddFilesCommand(Command):
-  def __init__(self, dataset, files=None):
-    super(AddFilesCommand, self).__init__()
-    self.dataset_id = dataset
-    self.files = files or []
-
+@handles("createfile")
+class CreateFileCommand(Command):
+  def __init__(self, filehash):
+    super(CreateFileCommand, self).__init__()
+    self.id = filehash
+  def to_data(self):
+    return {'id': self.id}
   @classmethod
   def from_data(cls, data):
-    # Extract the file list from the data
-    files = [Datafile.from_data(x) for x in data["files"]]
-    return cls(data.get("set"), files=files)
-  def to_data(self):
-    # Build the file info, but trim off blank fields
-    files = [x.to_data() for x in self.files]
-    return {'set': self.dataset_id, "files": files}
+    return cls(data["id"])
   def apply(self, index):
-    dataset = index.datasets[self.dataset_id]
-    dataset.files.extend(self.files)
+    index.files[self.id] = DataFile(self.id)
 
+@handles("addfilestoset")
+class AddFilesToSetCommand(Command):
+  def __init__(self, dataset, files):
+    super(AddFilesToSetCommand, self).__init__()
+    self.dataset = dataset
+    self.files = files
+  @classmethod
+  def from_data(cls, data):
+    return cls(data.get("set"), data.get("files"))
+  def to_data(self):
+    return {"files": self.files, "set": self.dataset}
+  def apply(self, index):
+    dataset = index.datasets[self.dataset]
+    files = [index.files[x] for x in self.files]
+    dataset.files.extend(files)
   def __str__(self):
-    return "[Add {} files to set {}]".format(len(self.files), self.dataset_id)
+    return "[Add {} files to {}]".format(len(self.files), self.dataset)
 
 @handles("addtags")
 class AddTagsCommand(Command):
@@ -122,21 +122,18 @@ class RemoveTagsCommand(AddTagsCommand):
 
 @handles("setproperty")
 class SetPropertyCommand(Command):
-  def __init__(self, dataset_id, property, value):
+  def __init__(self, _id, property, value):
     super(SetPropertyCommand, self).__init__()
-    self.set = dataset_id
-    # Ensure it is a valid property
-    assert property in ["name"]
+    self.id = _id
     self.property = property
     self.value = value
   def apply(self, index):
-    dataset = index.datasets[self.set]
-    if self.property == "name":
-      dataset.name = self.value
+    dest = index.datasets.get(self.id) or index.files.get(self.id)
+    dest.attrs[self.property] = self.value
   def __str__(self):
-    return "[Set {} property {} to {}]".format(self.set, self.property, self.value)
+    return "[Set {}.{} to {}]".format(self.id, self.property, self.value)
   @classmethod
   def from_data(cls, data):
-    return cls(data["set"], data["property"], data["value"])
+    return cls(data["id"], data["property"], data["value"])
   def to_data(self):
-    return {"set": self.set, "property": self.property, "value":self.value}
+    return {"id": self.id, "property": self.property, "value":self.value}

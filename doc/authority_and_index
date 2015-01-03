@@ -1,0 +1,8 @@
+
+Data authority - holds:
+- Data sets
+- Index of files, by UUID
+- Maps of known SHASUMS for each file
+
+Data Index holds:
+- Lists of accessible files by SHASUM
