@@ -18,6 +18,9 @@ class DataFile(object):
     self.id = _id
     self.instances = instances or []
 
+  def can_read(self):
+    return any(os.path.isfile(x.filename) for x in self.instances)
+
 class FileInstance(object):
   def __init__(self, filename=None, hashsum=None, size=None, timestamp=None):
     self.filename = filename
@@ -37,8 +40,8 @@ class FileInstance(object):
 
   def to_data(self):
     return {x:y for x, y in {
-      "filename": self.path,
-      "hashsum": self.shasum,
+      "filename": self.filename,
+      "hashsum": self.hashsum,
       "size": self.size,
       "timestamp": self.timestamp
     }.items() if y}

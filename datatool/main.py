@@ -10,6 +10,7 @@ Usage:
   data [options] files <name-or-id>
   data [options] search <tag> [<tag>...]
   data [options] identify <file> [<file>...]
+  data [options] sets
 
 Options:
   --authority=<auth>  Use a specific data authority
@@ -26,6 +27,7 @@ Commands:
   files         Retrieve the file list for a specific data set
   search        Find a list of dataset names matching a list of tags
   identify      Find any datasets containing any given files
+  sets          List all non-empty data sets
 """
 
 from __future__ import print_function
@@ -38,6 +40,7 @@ from docopt import docopt
 
 from .index import find_index, LocalFileIndex
 from .authority import find_authority, LocalFileAuthority
+from .util import first
 
 def find_sources(authority=None, index=None):
   if not authority:
@@ -52,11 +55,6 @@ def find_sources(authority=None, index=None):
     sys.exit(2)
   return (authority, index)
 
-def first(it):
-  try:
-    return iter(it).next()
-  except StopIteration:
-    return None
 
 def main(argv):
   args = docopt(__doc__, argv=argv[1:])
@@ -93,7 +91,14 @@ def main(argv):
       print (dataset.id, dataset.name.ljust(max_name), ",".join(dataset.tags))
 
   elif args["identify"]:
-    pass
+    assert False
+  elif args["sets"]:
+    sets = [x for x in authority._data.datasets.values() if x.files]
+    nameLen = max(len(x.name or x.id) for x in sets)
+    for dataSet in sets:
+      print ("{} {} {} files".format((dataSet.name or dataSet.id).ljust(nameLen),
+        "(no read)" if not dataSet.can_read() else " "*9, len(dataSet.files)))
+
   # Write any changes to the index
   authority.write()
   index.write()

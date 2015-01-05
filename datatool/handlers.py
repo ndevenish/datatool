@@ -66,8 +66,8 @@ class CreateSetCommand(Command):
 class CreateFileCommand(Command):
   def __init__(self, entry):
     super(CreateFileCommand, self).__init__()
-    self.id = entry.hashsum
-    self.entry = entry
+    self.id = str(entry.hashsum)
+    self.entry = FileInstance(filename=entry.filename,hashsum=entry.hashsum,size=entry.size,timestamp=entry.timestamp)
   def to_data(self):
     return self.entry.to_data()
   @classmethod
@@ -91,7 +91,7 @@ class AddFilesToSetCommand(Command):
     return {"files": self.files, "set": self.dataset}
   def apply(self, authority):
     dataset = authority.datasets[self.dataset]
-    files = [authority.files[x] for x in self.files if not authority.files[x] in dataset.files]
+    files = [authority.files[str(x)] for x in self.files if not authority.files[x] in dataset.files]
     dataset.files.extend(files)
   def __str__(self):
     return "[Add {} files to {}]".format(len(self.files), self.dataset)

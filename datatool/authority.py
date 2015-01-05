@@ -128,8 +128,6 @@ class Authority(object):
   def get_file(self, fileid):
     return self._data.files[fileid]
 
-print (dir(Authority))
-
 class StringAuthority(object):
   def __init__(self, stringdata):
     super(StringAuthority,self).__init__()

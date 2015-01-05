@@ -16,6 +16,10 @@ class Dataset(object):
   def name(self):
       return self.attrs.get("name")
   
+  def can_read(self):
+    """Can all files be read?"""
+    return all(x.can_read() for x in self.files)
+
   def __str__(self):
     return "{" + self.id + "}"
 
