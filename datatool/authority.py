@@ -122,7 +122,8 @@ class Authority(object):
     """Applies an index set to the authority, temporarily merging the data"""
     self.index = index
     for f in index._data.values():
-      assert f.hashsum in self._data.files
+      if not f.hashsum in self._data.files:
+        self._apply_command(CreateFileCommand(f))
       self._data.files[f.hashsum].instances.append(f)
 
   def get_file(self, fileid):
