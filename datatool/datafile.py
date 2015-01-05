@@ -19,11 +19,11 @@ class DataFile(object):
     self.instances = instances or []
 
 class FileInstance(object):
-  def __init__(self, path, shasum=None, size=None, timestamp=None):
-    self.path = path
-    self.shasum = shasum
-    self.size = size
-    self.timestamp = timestamp
+  def __init__(self, filename=None, hashsum=None, size=None, timestamp=None):
+    self.filename = filename
+    self.hashsum = hashsum
+    self.size = int(size) if size is not None else None
+    self.timestamp = float(timestamp) if timestamp is not None else None
 
   @classmethod
   def from_data(cls, data):
@@ -32,13 +32,13 @@ class FileInstance(object):
   @classmethod
   def from_file(cls, filename):
     stats = os.stat(filename)
-    return FileInstance(filename, shasum=hashfile(filename), 
+    return FileInstance(filename, hashsum=hashfile(filename), 
                     size=stats.st_size, timestamp=stats.st_mtime)
 
   def to_data(self):
     return {x:y for x, y in {
-      "path": self.path,
-      "shasum": self.shasum,
+      "filename": self.path,
+      "hashsum": self.shasum,
       "size": self.size,
       "timestamp": self.timestamp
     }.items() if y}

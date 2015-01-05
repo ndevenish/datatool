@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 import dateutil.parser
 
 from .dataset import Dataset
-from .datafile import DataFile
+from .datafile import DataFile, FileInstance
 
 _HANDLERS = {}
 
@@ -64,16 +64,19 @@ class CreateSetCommand(Command):
 
 @handles("createfile")
 class CreateFileCommand(Command):
-  def __init__(self, filehash):
+  def __init__(self, entry):
     super(CreateFileCommand, self).__init__()
-    self.id = filehash
+    self.id = entry.hashsum
+    self.entry = entry
   def to_data(self):
-    return {'id': self.id}
+    return self.entry.to_data()
   @classmethod
   def from_data(cls, data):
-    return cls(data["id"])
+    return cls(FileInstance.from_data(data))
   def apply(self, index):
     index.files[self.id] = DataFile(self.id)
+  def __str__(self):
+    return "[Create file {}]".format(self.id)
 
 @handles("addfilestoset")
 class AddFilesToSetCommand(Command):
@@ -86,9 +89,9 @@ class AddFilesToSetCommand(Command):
     return cls(data.get("set"), data.get("files"))
   def to_data(self):
     return {"files": self.files, "set": self.dataset}
-  def apply(self, index):
-    dataset = index.datasets[self.dataset]
-    files = [index.files[x] for x in self.files]
+  def apply(self, authority):
+    dataset = authority.datasets[self.dataset]
+    files = [authority.files[x] for x in self.files if not authority.files[x] in dataset.files]
     dataset.files.extend(files)
   def __str__(self):
     return "[Add {} files to {}]".format(len(self.files), self.dataset)

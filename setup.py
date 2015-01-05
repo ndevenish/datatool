@@ -1,11 +1,11 @@
 from distutils.core import setup
 import setuptools
 
-setup(name="data",
+setup(name="datatool",
       version='0.1',
       author="Nicholas Devenish",
       author_email="ndevenish@gmail.com",
-      packages=['data'],
+      packages=['datatool'],
       scripts=['bin/data'],
       install_requires=["docopt", "python-dateutil"],
      )

@@ -1,7 +1,7 @@
 # coding: utf-8
 
 import json
-from data.authority import StringAuthority
+from datatool.authority import StringAuthority
 from StringIO import StringIO
 
 import logging

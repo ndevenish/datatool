@@ -94,7 +94,7 @@ class Authority(object):
   def add_files(self, set_id, file_entries):
     for f in file_entries:
       if not f.hashsum in self._data.files:
-        self._apply_command(CreateFileCommand(f.hashsum))
+        self._apply_command(CreateFileCommand(f))
     self._apply_command(AddFilesToSetCommand(set_id, [x.hashsum for x in file_entries]))
 
   def add_tags(self, set_id, tags):
@@ -118,6 +118,15 @@ class Authority(object):
     data = [x.id for x in self._data.datasets.values() if tags.issubset(x.tags)]
     return tuple(data)
 
+  def apply_index(self, index):
+    """Applies an index set to the authority, temporarily merging the data"""
+    self.index = index
+    for f in index._data.values():
+      assert f.hashsum in self._data.files
+      self._data.files[f.hashsum].instances.append(f)
+
+  def get_file(self, fileid):
+    return self._data.files[fileid]
 
 print (dir(Authority))
 
