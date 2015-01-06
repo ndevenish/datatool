@@ -15,8 +15,8 @@ Usage:
 Options:
   --authority=<auth>  Use a specific data authority
   --index=<index>     Use a specific data index
-  --name=<name>   Give a data set a name when creating
-  -d, --delete    Remove given tags from a dataset instead of adding
+  --name=<name>       Give a data set a name when creating
+  -d, --delete        Remove given tags from a dataset instead of adding
 
 Commands:
   set           Manipulate and create data sets
@@ -55,6 +55,15 @@ def find_sources(authority=None, index=None):
     sys.exit(2)
   return (authority, index)
 
+def print_sets(sets):
+  nameLen = max(len(x.name or x.id) for x in sets)
+  for dataSet in sets:
+    tagMessage = ""
+    if dataSet.tags:
+      tagMessage = "Tags: {}".format(", ".join(dataSet.tags))
+    print ("{} {} {} files  {}".format((dataSet.name or dataSet.id).ljust(nameLen),
+      "(no read)" if not dataSet.can_read() else " "*9, len(dataSet.files),
+      tagMessage))
 
 def main(argv):
   args = docopt(__doc__, argv=argv[1:])
@@ -91,24 +100,15 @@ def main(argv):
       print ("{} {}  {}".format(name.ljust(nameLen), msg.ljust(9), tagtext))
 
   elif args["search"]:
-    sets = [index[x] for x in authority.search(args["<tag>"])]
+    sets = [authority.fetch_dataset(x) for x in authority.search(args["<tag>"])]
     logger.info("{} results".format(len(sets)))
-    max_name = max([len(x.name) for x in sets if x.name] + [0])
-    for dataset in sets:
-      print (dataset.id, dataset.name.ljust(max_name), ",".join(dataset.tags))
+    print_sets(sets)
 
   elif args["identify"]:
     assert False
   elif args["sets"]:
     sets = [x for x in authority._data.datasets.values() if x.files]
-    nameLen = max(len(x.name or x.id) for x in sets)
-    for dataSet in sets:
-      tagMessage = ""
-      if dataSet.tags:
-        tagMessage = "Tags: {}".format(", ".join(dataSet.tags))
-      print ("{} {} {} files  {}".format((dataSet.name or dataSet.id).ljust(nameLen),
-        "(no read)" if not dataSet.can_read() else " "*9, len(dataSet.files),
-        tagMessage))
+    print_setlist(sets)
   elif args["tag"]:
     tageeName = args["<name-or-id>"]
     tagee = first([x for x in authority._data.values() if x.id.startswith(tageeName)])
