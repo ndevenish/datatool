@@ -58,12 +58,12 @@ def find_sources(authority=None, index=None):
   return (authority, index)
 
 def print_sets(sets):
-  nameLen = max(len(x.name or x.id) for x in sets)
+  nameLen = max(len(x.name) for x in sets)
   for dataSet in sets:
     tagMessage = ""
     if dataSet.tags:
       tagMessage = "Tags: {}".format(", ".join(dataSet.tags))
-    print ("{} {} {} files  {}".format((dataSet.name or dataSet.id).ljust(nameLen),
+    print ("{}  {} {} {} files  {}".format(dataSet.id, (dataSet.name or "").ljust(nameLen),
       "(no read)" if not dataSet.can_read() else " "*9, len(dataSet.files),
       tagMessage))
 
