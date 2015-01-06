@@ -22,7 +22,7 @@ class DataFile(object):
 
   def can_read(self):
     return any(os.path.isfile(x.filename) for x in self.instances)
-
+  
 class FileInstance(object):
   def __init__(self, filename=None, hashsum=None, size=None, timestamp=None):
     self.filename = filename

@@ -13,6 +13,7 @@ from collections import namedtuple
 logger = logging.getLogger(__name__)
 
 from .datafile import hashfile, FileInstance
+from .util import first
 
 reLineHeader = re.compile(r'^\s*([^\s]+)\s+(\w+)\s+([^\s]+)\s+(\w+)\s+(.*)$')
 
@@ -83,6 +84,13 @@ class Index(object):
         self._process_entries([entry])
         files.append(entry)
     return files
+
+  def fetch_file(self, filename_or_checksum):
+    """Fetches a file instance from a filename or partial checksum"""
+    fullpath = os.path.abspath(filename_or_checksum)
+    results = [x for x in self._data.values() if x.hashsum.startswith(filename_or_checksum) or fullpath == x.filename]
+    assert len(results) <= 1
+    return first(results)
 
 
 class LocalFileIndex(Index):

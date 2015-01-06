@@ -112,7 +112,7 @@ class AddTagsCommand(Command):
     tagee = authority[self.objId]
     tagee.tags = tagee.tags.union(self.tags)
   def __str__(self):
-    return "[Add tags {{{}}} to set {}]".format(", ".join(self.tags), self.objId)
+    return "[Add tags {{{}}} to item {}]".format(", ".join(self.tags), self.objId)
 
 @handles("removetags")
 class RemoveTagsCommand(AddTagsCommand):
@@ -121,7 +121,7 @@ class RemoveTagsCommand(AddTagsCommand):
     tagee = authority[self.objId]
     tagee.tags = tagee.tags.difference(self.tags)
   def __str__(self):
-    return "[Remove tags {{{}}} from set {}]".format(", ".join(self.tags), self.objId)
+    return "[Remove tags {{{}}} from item {}]".format(", ".join(self.tags), self.objId)
 
 @handles("setproperty")
 class SetPropertyCommand(Command):

@@ -15,6 +15,7 @@ from .handlers import handler_for, CreateSetCommand, CreateFileCommand, \
                       AddTagsCommand, RemoveTagsCommand
 from .datafile import DataFile
 from .dataset import Dataset
+from .util import first
 
 # Look for a non-blank line 
 reLineHeader = re.compile(r'^\s*([^\s]+)\s+(\w+)\s+(.*)$')
@@ -63,6 +64,7 @@ class AuthorityData(object):
     return self.entries[id]
 
   def __setitem__(self, key, value):
+    key = str(key)
     self.entries[key] = value
     if isinstance(value, DataFile):
       self.files[key] = value
@@ -71,9 +73,12 @@ class AuthorityData(object):
     else:
       raise KeyError("Instance not recognised")
 
+  def values(self):
+    return self.entries.values()
+
   def get(self, key, default=None):
     return self.entries.get(key, default)
-  
+
 class Authority(object):
   def __init__(self):
     self._data = AuthorityData()
@@ -115,16 +120,18 @@ class Authority(object):
     self._apply_command(AddFilesToSetCommand(set_id, [x.hashsum for x in file_entries]))
 
   def add_tags(self, set_id, tags):
-    self._apply_command(AddTagsCommand(set_id, tags))
+    if not self._data[set_id].tags.issuperset(tags):
+      self._apply_command(AddTagsCommand(set_id, tags))
 
   def remove_tags(self, set_id, tags):
-    self._apply_command(RemoveTagsCommand(set_id, tags))
+    if not self._data[set_id].isdisjoint(tags):
+      self._apply_command(RemoveTagsCommand(set_id, tags))
 
   def fetch_dataset(self, name_or_id):
     """Retrieve a single dataset from either the name, or a shortened (or complete) hash"""
     results = [y for x, y in self._data.datasets.items() if x.startswith(name_or_id) or y.name == name_or_id]
-    assert len(results) == 1
-    return results[0]
+    assert len(results) <= 1
+    return first(results)
 
   def __getitem__(self, id):
     return self._data.datasets[id]

@@ -3,9 +3,9 @@
 """Manage data sets and locations.
 
 Usage:
-  data [options] set create [--name=<name>] [<file>...]
-  data [options] set tag [--delete] <name-or-id> <tag> [<tag>...]
+  data [options] set create [--name=<name>] <file> [<file>...]
   data [options] set addfiles <name-or-id> <file> [<file>...]
+  data [options] tag [-d|--delete] (<name-or-id> | <file> ) <tag> [<tag>...]
   data [options] index <file> [<file>...]
   data [options] files <name-or-id>
   data [options] search <tag> [<tag>...]
@@ -20,9 +20,9 @@ Options:
 
 Commands:
   set           Manipulate and create data sets
-  set create    Create a new data set, optionally named and with a file list
-  set tag       Add a tag (or list of tags) to a dataset
+  set create    Create a new data set, optionally named, with a file list
   set addfiles  Add a set of files to a dataset
+  tag           Add a tag (or list of tags) to a dataset, or a file
   index         Explicitly add a set of files to the index
   files         Retrieve the file list for a specific data set
   search        Find a list of dataset names matching a list of tags
@@ -98,6 +98,25 @@ def main(argv):
     for dataSet in sets:
       print ("{} {} {} files".format((dataSet.name or dataSet.id).ljust(nameLen),
         "(no read)" if not dataSet.can_read() else " "*9, len(dataSet.files)))
+  elif args["tag"]:
+    tageeName = args["<name-or-id>"]
+    tagee = first([x for x in authority._data.values() if x.id.startswith(tageeName)])
+    if not tagee:
+      tagee = authority.fetch_dataset(tageeName)
+    if not tagee:
+      # Look for this in the index
+      fileEntry = index.fetch_file(tageeName)
+      if fileEntry:
+        tagee = authority._data.get(fileEntry.hashsum)
+    if not tagee:
+      logger.error("Could not find entry from criteria '{}'".format(tageeName))
+      return 1
+
+    if args["--delete"]:
+      authority.remove_tags(tagee.id, args["<tag>"])
+    else:
+      authority.add_tags(tagee.id, args["<tag>"])
+
 
   # Write any changes to the index
   authority.write()
@@ -112,12 +131,6 @@ def process_set(args, authority, index):
       files = list(index.add_files(args["<file>"]))
       authority.add_files(set_id, files)
     print (set_id)
-  elif args["tag"]:
-    dataset = authority.fetch_dataset(args['<name-or-id>'])
-    if args["--delete"]:
-      authority.remove_tags(dataset.id, args["<tag>"])
-    else:
-      authority.add_tags(dataset.id, args["<tag>"])
   elif args["addfiles"]:
     dataset = authority.fetch_dataset(args['<name-or-id>'])
     files = list(index.add_files(args["<file>"]))
