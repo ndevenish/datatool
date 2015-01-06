@@ -6,7 +6,7 @@ Usage:
   data [options] set create [--name=<name>] <file> [<file>...]
   data [options] set addfiles <name-or-id> <file> [<file>...]
   data [options] tag [-d] (<name-or-id-or-file> ) <tag> [<tag>...]
-  data [options] tag [-d] --tag=<tag> [--tag=<tag>] <name-or-id-or-file>...
+  data [options] tag [-d] --tag=<tag> [--tag=<tag>...] <name-or-id-or-file>...
   data [options] index <file> [<file>...]
   data [options] files <name-or-id>
   data [options] search <tag> [<tag>...]
