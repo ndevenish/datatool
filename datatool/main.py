@@ -73,15 +73,22 @@ def main(argv):
       index.add_files([f])
   elif args["files"]:
     dataset = authority.fetch_dataset(args['<name-or-id>'])
+    entries = []
     for datafile in dataset.files:
       # Find the last instance that exists
-      valid = first([x for x in reversed(datafile.instances) if os.path.isfile(x.filename)])
+      valid = datafile.get_valid_instance()
       if valid:
-        print (valid.filename)
+        entries.append((valid.filename, "", datafile.tags))
       elif not datafile.instances:
-        print ("MISSING: ({})".format(datafile.id))
+        entries.append((datafile.id, "(no meta)", datafile.tags))
       else:
-        print ("MISSING: {}".format(first(datafile.instances).filename))
+        entries.append(first(datafile.instances).filename, "(no read)", datafile.tags)
+    nameLen = max(len(x[0]) for x in entries)
+    for name, msg, tags in entries:
+      tagtext = ""
+      if tags:
+        tagtext = "Tags: " + ", ".join(tags)
+      print ("{} {}  {}".format(name.ljust(nameLen), msg.ljust(9), tagtext))
 
   elif args["search"]:
     sets = [index[x] for x in authority.search(args["<tag>"])]
@@ -96,8 +103,12 @@ def main(argv):
     sets = [x for x in authority._data.datasets.values() if x.files]
     nameLen = max(len(x.name or x.id) for x in sets)
     for dataSet in sets:
-      print ("{} {} {} files".format((dataSet.name or dataSet.id).ljust(nameLen),
-        "(no read)" if not dataSet.can_read() else " "*9, len(dataSet.files)))
+      tagMessage = ""
+      if dataSet.tags:
+        tagMessage = "Tags: {}".format(", ".join(dataSet.tags))
+      print ("{} {} {} files  {}".format((dataSet.name or dataSet.id).ljust(nameLen),
+        "(no read)" if not dataSet.can_read() else " "*9, len(dataSet.files),
+        tagMessage))
   elif args["tag"]:
     tageeName = args["<name-or-id>"]
     tagee = first([x for x in authority._data.values() if x.id.startswith(tageeName)])
