@@ -5,7 +5,8 @@
 Usage:
   data [options] set create [--name=<name>] <file> [<file>...]
   data [options] set addfiles <name-or-id> <file> [<file>...]
-  data [options] tag [-d|--delete] (<name-or-id> | <file> ) <tag> [<tag>...]
+  data [options] tag [-d] (<name-or-id-or-file> ) <tag> [<tag>...]
+  data [options] tag [-d] --tag=<tag> [--tag=<tag>] <name-or-id-or-file>...
   data [options] index <file> [<file>...]
   data [options] files <name-or-id>
   data [options] search <tag> [<tag>...]
@@ -16,13 +17,14 @@ Options:
   --authority=<auth>  Use a specific data authority
   --index=<index>     Use a specific data index
   --name=<name>       Give a data set a name when creating
+  -t, --tag=<tag>     Explicitly specify tags when adding to multiple items
   -d, --delete        Remove given tags from a dataset instead of adding
 
 Commands:
   set           Manipulate and create data sets
   set create    Create a new data set, optionally named, with a file list
   set addfiles  Add a set of files to a dataset
-  tag           Add a tag (or list of tags) to a dataset, or a file
+  tag           Add a tag (or list of tags) to a dataset, or a file, or several
   index         Explicitly add a set of files to the index
   files         Retrieve the file list for a specific data set
   search        Find a list of dataset names matching a list of tags
@@ -67,6 +69,7 @@ def print_sets(sets):
 
 def main(argv):
   args = docopt(__doc__, argv=argv[1:])
+  print (args)
 
   # Find the data index file
   authority_name, index_name = find_sources(args["--authority"], args["--index"])
@@ -110,23 +113,26 @@ def main(argv):
     sets = [x for x in authority._data.datasets.values() if x.files]
     print_sets(sets)
   elif args["tag"]:
-    tageeName = args["<name-or-id>"]
-    tagee = first([x for x in authority._data.values() if x.id.startswith(tageeName)])
-    if not tagee:
-      tagee = authority.fetch_dataset(tageeName)
-    if not tagee:
-      # Look for this in the index
-      fileEntry = index.fetch_file(tageeName)
-      if fileEntry:
-        tagee = authority._data.get(fileEntry.hashsum)
-    if not tagee:
-      logger.error("Could not find entry from criteria '{}'".format(tageeName))
-      return 1
+    import pdb
+    pdb.set_trace()
+    tagees = args["<name-or-id-or-file>"]
+    for tageeName in tagees:
+      tagee = first([x for x in authority._data.values() if x.id.startswith(tageeName)])
+      if not tagee:
+        tagee = authority.fetch_dataset(tageeName)
+      if not tagee:
+        # Look for this in the index
+        fileEntry = index.fetch_file(tageeName)
+        if fileEntry:
+          tagee = authority._data.get(fileEntry.hashsum)
+      if not tagee:
+        logger.error("Could not find entry from criteria '{}'".format(tageeName))
+        return 1
 
-    if args["--delete"]:
-      authority.remove_tags(tagee.id, args["<tag>"])
-    else:
-      authority.add_tags(tagee.id, args["<tag>"])
+      if args["--delete"]:
+        authority.remove_tags(tagee.id, args["--tag"])
+      else:
+        authority.add_tags(tagee.id, args["--tag"])
 
 
   # Write any changes to the index
