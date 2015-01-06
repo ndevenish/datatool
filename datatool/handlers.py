@@ -58,7 +58,7 @@ class CreateSetCommand(Command):
     return {"id": self.id}
   def apply(self, index):
     assert not self.id in index.datasets
-    index.datasets[self.id] = Dataset(self.id)
+    index[self.id] = Dataset(self.id)
   def __str__(self):
     return "[Create Set {}]".format(self.id)
 
@@ -74,7 +74,7 @@ class CreateFileCommand(Command):
   def from_data(cls, data):
     return cls(FileInstance.from_data(data))
   def apply(self, index):
-    index.files[self.id] = DataFile(self.id)
+    index[self.id] = DataFile(self.id)
   def __str__(self):
     return "[Create file {}]".format(self.id)
 
@@ -99,29 +99,29 @@ class AddFilesToSetCommand(Command):
 @handles("addtags")
 class AddTagsCommand(Command):
   command = "addtags"
-  def __init__(self, dataset, tags=None):
+  def __init__(self, objId, tags=None):
     super(AddTagsCommand, self).__init__()
-    self.dataset_id = dataset
+    self.objId = objId
     self.tags = set(tags) or {}
   @classmethod
   def from_data(cls, data):
-    return cls(data["set"], data["tags"])
+    return cls(data["id"], data["tags"])
   def to_data(self):
-    return {"set": self.dataset_id, "tags": list(self.tags)}
-  def apply(self, index):
-    dataset = index.datasets[self.dataset_id]
-    dataset.tags = dataset.tags.union(self.tags)
+    return {"id": self.objId, "tags": list(self.tags)}
+  def apply(self, authority):
+    tagee = authority[self.objId]
+    tagee.tags = tagee.tags.union(self.tags)
   def __str__(self):
-    return "[Add tags {{{}}} to set {}]".format(", ".join(self.tags), self.dataset_id)
+    return "[Add tags {{{}}} to set {}]".format(", ".join(self.tags), self.objId)
 
 @handles("removetags")
 class RemoveTagsCommand(AddTagsCommand):
   command = "removetags"
-  def apply(self, index):
-    dataset = index.datasets[self.dataset_id]
-    dataset.tags = dataset.tags.difference(self.tags)
+  def apply(self, authority):
+    tagee = authority[self.objId]
+    tagee.tags = tagee.tags.difference(self.tags)
   def __str__(self):
-    return "[Remove tags {{{}}} from set {}]".format(", ".join(self.tags), self.dataset_id)
+    return "[Remove tags {{{}}} from set {}]".format(", ".join(self.tags), self.objId)
 
 @handles("setproperty")
 class SetPropertyCommand(Command):

@@ -14,6 +14,7 @@ from .handlers import handler_for, CreateSetCommand, CreateFileCommand, \
                       SetPropertyCommand, AddFilesToSetCommand, \
                       AddTagsCommand, RemoveTagsCommand
 from .datafile import DataFile
+from .dataset import Dataset
 
 # Look for a non-blank line 
 reLineHeader = re.compile(r'^\s*([^\s]+)\s+(\w+)\s+(.*)$')
@@ -56,6 +57,19 @@ class AuthorityData(object):
   def __init__(self):
     self.datasets = {}
     self.files = {}
+    self.entries = {}
+
+  def __getitem__(self, id):
+    return self.entries[id]
+
+  def __setitem__(self, key, value):
+    self.entries[key] = value
+    if isinstance(value, DataFile):
+      self.files[key] = value
+    elif isinstance(value, Dataset):
+      self.datasets[key] = value
+    else:
+      raise KeyError("Instance not recognised")
 
 class Authority(object):
   def __init__(self):

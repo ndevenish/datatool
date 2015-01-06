@@ -17,6 +17,8 @@ class DataFile(object):
   def __init__(self, _id, instances=None):
     self.id = _id
     self.instances = instances or []
+    self.tags = set()
+    self.attrs = {}
 
   def can_read(self):
     return any(os.path.isfile(x.filename) for x in self.instances)
