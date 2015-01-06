@@ -70,7 +70,7 @@ def main(argv):
   elif args["index"]:
     for f in args["<file>"]:
       logger.info("Indexing {}".format(f))
-    index.add_files([f])
+      index.add_files([f])
   elif args["files"]:
     dataset = authority.fetch_dataset(args['<name-or-id>'])
     for datafile in dataset.files:
