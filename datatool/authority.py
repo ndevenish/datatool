@@ -71,6 +71,9 @@ class AuthorityData(object):
     else:
       raise KeyError("Instance not recognised")
 
+  def get(self, key, default=None):
+    return self.entries.get(key, default)
+  
 class Authority(object):
   def __init__(self):
     self._data = AuthorityData()

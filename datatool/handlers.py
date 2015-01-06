@@ -130,9 +130,8 @@ class SetPropertyCommand(Command):
     self.id = _id
     self.property = property
     self.value = value
-  def apply(self, index):
-    dest = index.datasets.get(self.id) or index.files.get(self.id)
-    dest.attrs[self.property] = self.value
+  def apply(self, authority):
+    authority[self.id].attrs[self.property] = self.value
   def __str__(self):
     return "[Set {}.{} to {}]".format(self.id, self.property, self.value)
   @classmethod
