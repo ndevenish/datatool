@@ -65,7 +65,7 @@ class Index(object):
     entry = self._names[filename]
     fileData = os.stat(filename)
     size, timestamp = (fileData.st_size, fileData.st_mtime)
-    if size != entry.size or timestamp != entry.timestamp:
+    if size != entry.size or str(timestamp) != str(entry.timestamp):
       logger.info("File {} appears to have changed, re-indexing".format(filename))
       entry = FileInstance.from_file(filename)
       self._process_entries([entry])
