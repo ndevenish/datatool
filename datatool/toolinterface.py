@@ -27,7 +27,6 @@ class DatasetInterface(object):
     return "<Dataset '{}', {} files>".format(self._dataset.name or self._Dataset.id[:5], len(self._dataset.files))
   def __repr__(self):
     return str(self)
-
   def __iter__(self):
     return iter(self._filenames())
 

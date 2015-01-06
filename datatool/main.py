@@ -108,7 +108,7 @@ def main(argv):
     assert False
   elif args["sets"]:
     sets = [x for x in authority._data.datasets.values() if x.files]
-    print_setlist(sets)
+    print_sets(sets)
   elif args["tag"]:
     tageeName = args["<name-or-id>"]
     tagee = first([x for x in authority._data.values() if x.id.startswith(tageeName)])
