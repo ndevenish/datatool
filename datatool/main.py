@@ -113,8 +113,6 @@ def main(argv):
     sets = [x for x in authority._data.datasets.values() if x.files]
     print_sets(sets)
   elif args["tag"]:
-    import pdb
-    pdb.set_trace()
     tagees = args["<name-or-id-or-file>"]
     for tageeName in tagees:
       tagee = first([x for x in authority._data.values() if x.id.startswith(tageeName)])
