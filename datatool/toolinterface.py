@@ -36,12 +36,18 @@ class DataSetFileNavigator(object):
   def tags(self):
     return self._tags
 
+  def tagged(self, name):
+    if name in [x.lower() for x in self._tags]:
+      return DataSetFileNavigator(self._dataset, [x for x in self._subset if name in [y.lower() for y in x.tags]], path)
+    else:
+      raise SubsetError("No entries in subset with tag or extension named '{}'".format(attr))
+    
   def __getattr__(self, attr):
     """Allow addressing via tag"""
     attr = attr.lower()
     path = self._path + [attr]
     if attr in [x.lower() for x in self._tags]:
-      return DataSetFileNavigator(self._dataset, [x for x in self._subset if attr in [y.lower() for y in x.tags]], path)
+      return self.tagged(attr)      
     elif attr in [x.lower() for x in self._extensions]:
       return DataSetFileNavigator(self._dataset, [x for x in self._subset if x.get_valid_instance().filename.lower().endswith(attr)], path)
     else:
