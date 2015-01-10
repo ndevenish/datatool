@@ -5,7 +5,7 @@
 Usage:
   data [options] set create [--name=<name>] <file> [<file>...]
   data [options] set addfiles <name-or-id> <file> [<file>...]
-  data [options] tag [-d] (<name-or-id-or-file> ) <tag> [<tag>...]
+  data [options] tag [-d] (<name-or-id-or-file>) <tag> [<tag>...]
   data [options] tag [-d] --tag=<tag> [--tag=<tag>...] <name-or-id-or-file>...
   data [options] index <file> [<file>...]
   data [options] files <name-or-id>
@@ -36,7 +36,7 @@ from __future__ import print_function
 import sys, os
 import logging
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG, stream=sys.stderr)
+logging.basicConfig(level=logging.INFO, stream=sys.stderr)
 
 from docopt import docopt
 
@@ -69,7 +69,6 @@ def print_sets(sets):
 
 def main(argv):
   args = docopt(__doc__, argv=argv[1:])
-  print (args)
 
   # Find the data index file
   authority_name, index_name = find_sources(args["--authority"], args["--index"])
@@ -114,6 +113,7 @@ def main(argv):
     print_sets(sets)
   elif args["tag"]:
     tagees = args["<name-or-id-or-file>"]
+    tags = set(args["--tag"]).union(args["<tag>"])
     for tageeName in tagees:
       tagee = first([x for x in authority._data.values() if x.id.startswith(tageeName)])
       if not tagee:
@@ -128,9 +128,9 @@ def main(argv):
         return 1
 
       if args["--delete"]:
-        authority.remove_tags(tagee.id, args["--tag"])
+        authority.remove_tags(tagee.id, tags)
       else:
-        authority.add_tags(tagee.id, args["--tag"])
+        authority.add_tags(tagee.id, tags)
 
 
   # Write any changes to the index
