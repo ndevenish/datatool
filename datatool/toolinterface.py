@@ -38,6 +38,7 @@ class DataSetFileNavigator(object):
 
   def tagged(self, name):
     if name in [x.lower() for x in self._tags]:
+      path = self._path + [name]
       return DataSetFileNavigator(self._dataset, [x for x in self._subset if name in [y.lower() for y in x.tags]], path)
     else:
       raise SubsetError("No entries in subset with tag or extension named '{}'".format(attr))
