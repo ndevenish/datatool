@@ -7,6 +7,8 @@ logger = logging.getLogger(__name__)
 
 import dateutil.parser
 
+import six
+
 from .dataset import Dataset
 from .datafile import DataFile, FileInstance
 
@@ -36,7 +38,7 @@ class Command(object):
 
   @property
   def timestamp(self):
-    if isinstance(self._timestamp, basestring):
+    if any(isinstance(self._timestamp, x) for x in six.string_types):
       try:
         self._timestamp = dateutil.parser.parse(self._timestamp)
       except ValueError:
