@@ -7,8 +7,9 @@ import re
 import json
 import dateutil.parser
 import logging
-from StringIO import StringIO
 logger = logging.getLogger(__name__)
+
+from six.moves import StringIO
 
 from .handlers import handler_for, CreateSetCommand, CreateFileCommand, \
                       SetPropertyCommand, AddFilesToSetCommand, \

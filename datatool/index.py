@@ -8,7 +8,9 @@ import json
 import dateutil.parser
 import logging
 import datetime
-from StringIO import StringIO
+
+from six.moves import StringIO
+
 from collections import namedtuple
 logger = logging.getLogger(__name__)
 
