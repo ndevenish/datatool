@@ -91,7 +91,7 @@ def main(argv):
       # Find the last instance that exists
       valid = datafile.get_valid_instance()
       # Check that this file contains all the tags passed in 
-      if not tagfilter.issubset(datafile.tags):
+      if not tagfilter.issubset(set(x.lower() for x in datafile.tags)):
         continue
       if valid:
         entries.append((valid.filename, "", datafile.tags))
