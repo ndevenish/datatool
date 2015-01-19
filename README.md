@@ -129,3 +129,6 @@ Future Plans
 - Date-range specification - so that you can retrieve a data set specified at
   some particular point in the past. The data-system is designed around this
   being implemented at some future point.
+- Subsets: So a single dataset can be a small collection of files if needed,
+  but can also reference a large collection. This would also allow sanity with
+  e.g. asserting that all retrieved files are a complete, single set
