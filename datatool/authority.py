@@ -125,7 +125,7 @@ class Authority(object):
       self._apply_command(AddTagsCommand(set_id, tags))
 
   def remove_tags(self, set_id, tags):
-    if not self._data[set_id].isdisjoint(tags):
+    if not self._data[set_id].tags.isdisjoint(tags):
       self._apply_command(RemoveTagsCommand(set_id, tags))
 
   def fetch_dataset(self, name_or_id):
