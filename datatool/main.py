@@ -85,7 +85,7 @@ def main(argv):
       index.add_files([f])
   elif args["files"]:
     dataset = authority.fetch_dataset(args['<name-or-id>'])
-    tagfilter = set(args["<tag>"])
+    tagfilter = set(x.lower() for x in args["<tag>"])
     entries = []
     for datafile in dataset.files:
       # Find the last instance that exists
@@ -99,15 +99,16 @@ def main(argv):
         entries.append((datafile.id, "(no meta)", datafile.tags))
       else:
         entries.append(first(datafile.instances).filename, "(no read)", datafile.tags)
-    nameLen = max(len(x[0]) for x in entries)
-    for name, msg, tags in entries:
-      tagtext = ""
-      if args["-1"]:
-        print (name)
-      else:
-        if tags:
-          tagtext = "Tags: " + ", ".join(tags)
-        print ("{} {}  {}".format(name.ljust(nameLen), msg.ljust(9), tagtext))
+    if entries:
+      nameLen = max(len(x[0]) for x in entries)
+      for name, msg, tags in entries:
+        tagtext = ""
+        if args["-1"]:
+          print (name)
+        else:
+          if tags:
+            tagtext = "Tags: " + ", ".join(tags)
+          print ("{} {}  {}".format(name.ljust(nameLen), msg.ljust(9), tagtext))
 
   elif args["search"]:
     sets = [authority.fetch_dataset(x) for x in authority.search(args["<tag>"])]
