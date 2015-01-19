@@ -8,7 +8,7 @@ Usage:
   data [options] tag [-d] (<name-or-id-or-file>) <tag> [<tag>...]
   data [options] tag [-d] --tag=<tag> [--tag=<tag>...] <name-or-id-or-file>...
   data [options] index <file> [<file>...]
-  data [options] files <name-or-id>
+  data [options] files <name-or-id> [<tag> [<tag>...]]
   data [options] search <tag> [<tag>...]
   data [options] identify <file> [<file>...]
   data [options] sets
@@ -19,6 +19,7 @@ Options:
   --name=<name>       Give a data set a name when creating
   -t, --tag=<tag>     Explicitly specify tags when adding to multiple items
   -d, --delete        Remove given tags from a dataset instead of adding
+  -1                  Output only one (filename, set) per line. For parsing.
 
 Commands:
   set           Manipulate and create data sets
@@ -84,10 +85,14 @@ def main(argv):
       index.add_files([f])
   elif args["files"]:
     dataset = authority.fetch_dataset(args['<name-or-id>'])
+    tagfilter = set(args["<tag>"])
     entries = []
     for datafile in dataset.files:
       # Find the last instance that exists
       valid = datafile.get_valid_instance()
+      # Check that this file contains all the tags passed in 
+      if not tagfilter.issubset(datafile.tags):
+        continue
       if valid:
         entries.append((valid.filename, "", datafile.tags))
       elif not datafile.instances:
@@ -97,9 +102,12 @@ def main(argv):
     nameLen = max(len(x[0]) for x in entries)
     for name, msg, tags in entries:
       tagtext = ""
-      if tags:
-        tagtext = "Tags: " + ", ".join(tags)
-      print ("{} {}  {}".format(name.ljust(nameLen), msg.ljust(9), tagtext))
+      if args["-1"]:
+        print (name)
+      else:
+        if tags:
+          tagtext = "Tags: " + ", ".join(tags)
+        print ("{} {}  {}".format(name.ljust(nameLen), msg.ljust(9), tagtext))
 
   elif args["search"]:
     sets = [authority.fetch_dataset(x) for x in authority.search(args["<tag>"])]
