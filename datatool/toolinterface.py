@@ -20,7 +20,7 @@ class DataSetFileNavigator(object):
     self._subset = subset
     self._path = path or []
     self._tags = set([str(x) for x in itertools.chain(*[x.tags for x in self._subset])])
-    self._extensions = [os.path.splitext(x.get_valid_instance().filename)[1].lstrip(".").lower() for x in self._subset]
+    self._extensions = [os.path.splitext(x.get_valid_instance().filename)[1].lstrip(".").lower() for x in self._subset if x.get_valid_instance()]
 
   @property
   def all(self):
