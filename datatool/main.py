@@ -8,7 +8,7 @@ Usage:
   data [options] tag [-d] (<name-or-id-or-file>) <tag> [<tag>...]
   data [options] tag [-d] --tag=<tag> [--tag=<tag>...] <name-or-id-or-file>...
   data [options] index <file> [<file>...]
-  data [options] files <name-or-id> [<tag> [<tag>...]]
+  data [options] files [--wildcard] <name-or-id> [<tag> [<tag>...]]
   data [options] search <tag> [<tag>...]
   data [options] identify <file> [<file>...]
   data [options] sets
@@ -20,6 +20,7 @@ Options:
   -t, --tag=<tag>     Explicitly specify tags when adding to multiple items
   -d, --delete        Remove given tags from a dataset instead of adding
   -1                  Output only one (filename, set) per line. For parsing.
+  -w, --wildcard      Attempt to output filenames as wildcards
 
 Commands:
   set           Manipulate and create data sets
@@ -43,7 +44,7 @@ from docopt import docopt
 
 from .index import find_index, LocalFileIndex
 from .authority import find_authority, LocalFileAuthority
-from .util import first
+from .util import first, get_wildcards
 
 def find_sources(authority=None, index=None):
   if not authority:
@@ -100,15 +101,20 @@ def main(argv):
       else:
         entries.append(first(datafile.instances).filename, "(no read)", datafile.tags)
     if entries:
-      nameLen = max(len(x[0]) for x in entries)
-      for name, msg, tags in entries:
-        tagtext = ""
-        if args["-1"]:
-          print (name)
-        else:
-          if tags:
-            tagtext = "Tags: " + ", ".join(tags)
-          print ("{} {}  {}".format(name.ljust(nameLen), msg.ljust(9), tagtext))
+      if args["--wildcard"]:
+        # Only use filenames, and reduce the list
+        reduced_entries = get_wildcards(x for x,_,_ in entries)
+        print ("\n".join(reduced_entries))
+      else:
+        nameLen = max(len(x[0]) for x in entries)
+        for name, msg, tags in entries:
+          tagtext = ""
+          if args["-1"]:
+            print (name)
+          else:
+            if tags:
+              tagtext = "Tags: " + ", ".join(tags)
+            print ("{} {}  {}".format(name.ljust(nameLen), msg.ljust(9), tagtext))
 
   elif args["search"]:
     sets = [authority.fetch_dataset(x) for x in authority.search(args["<tag>"])]
