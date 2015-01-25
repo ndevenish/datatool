@@ -130,7 +130,7 @@ class Authority(object):
 
   def fetch_dataset(self, name_or_id):
     """Retrieve a single dataset from either the name, or a shortened (or complete) hash"""
-    results = [y for x, y in self._data.datasets.items() if x.startswith(name_or_id) or y.name == name_or_id]
+    results = [y for x, y in self._data.datasets.items() if x.lower().startswith(name_or_id.lower()) or y.name.lower() == name_or_id.lower()]
     assert len(results) <= 1
     return first(results)
 
