@@ -98,6 +98,23 @@ class AddFilesToSetCommand(Command):
   def __str__(self):
     return "[Add {} files to {}]".format(len(self.files), self.dataset)
 
+@handles("rmfilesfromset")
+class RmFilesFromSetCommand(Command):
+  def __init__(self, dataset, files):
+    super(RmFilesFromSetCommand, self).__init__()
+    self.dataset = dataset
+    self.files = [str(x) for x in files]
+  @classmethod
+  def from_data(cls, data):
+    return cls(data.get("set"), data.get("files"))
+  def to_data(self):
+    return {"files": self.files, "set": self.dataset}
+  def apply(self, authority):
+    dataset = authority.datasets[self.dataset]
+    dataset.files = [x for x in dataset.files if not x.id in self.files]
+  def __str__(self):
+    return "[Remove {} files from {}]".format(len(self.files), self.dataset)
+
 @handles("addtags")
 class AddTagsCommand(Command):
   command = "addtags"

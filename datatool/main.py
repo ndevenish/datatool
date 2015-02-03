@@ -5,6 +5,8 @@
 Usage:
   data [options] set create [--name=<name>] <file> [<file>...]
   data [options] set addfiles <name-or-id> <file> [<file>...]
+  data [options] set rmfiles <name-or-id> <file-or-hash> [<file-or-hash>...]
+  data [options] set delete <name-or-id>
   data [options] tag [-d] (<name-or-id-or-file>) <tag> [<tag>...]
   data [options] tag [-d] --tag=<tag> [--tag=<tag>...] <name-or-id-or-file>...
   data [options] index <file> [<file>...]
@@ -26,6 +28,8 @@ Commands:
   set           Manipulate and create data sets
   set create    Create a new data set, optionally named, with a file list
   set addfiles  Add a set of files to a dataset
+  set rmfiles   Remove files from a dataset
+  set delete    Remove a dataset.
   tag           Add a tag (or list of tags) to a dataset, or a file, or several
   index         Explicitly add a set of files to the index
   files         Retrieve the file list for a specific data set
@@ -45,6 +49,7 @@ from docopt import docopt
 from .index import find_index, LocalFileIndex
 from .authority import find_authority, LocalFileAuthority
 from .util import first, get_wildcards
+from .datafile import FileInstance
 
 def find_sources(authority=None, index=None):
   if not authority:
@@ -166,3 +171,31 @@ def process_set(args, authority, index):
     dataset = authority.fetch_dataset(args['<name-or-id>'])
     files = list(index.add_files(args["<file>"]))
     authority.add_files(dataset.id, files)
+  elif args["rmfiles"]:
+    #   data [options] set rmfiles <name-or-id> <file-or-hash> [<file-or-hash>...]
+    dataset = authority.fetch_dataset(args['<name-or-id>'])
+    hashesToRemove = []
+    for toRemove in args["<file-or-hash>"]:
+      # Find the file instance and remove it
+      # Look for this file already
+      filei = index.fetch_file(toRemove)
+      if filei in dataset.files:
+        hashesToRemove.append(filei.id)
+      elif os.path.isfile(toRemove):
+        # Harder case: Hash the file if it exists
+        instance = FileInstance.from_file(toRemove)
+        # Is this in the dataset?
+        results = [x for x in dataset.files if x.id == instance.hashsum]
+        for res in results:
+          logger.debug("Removing file {}".format(res))
+          hashesToRemove.append(res.id)
+      else:
+        # Hardest case: No file on disk. remove from instance location.
+        logger.warn("Removing file {} from instance location only".format(toRemove))
+        assert false
+        # (needs more thought)
+    authority.remove_files(dataset.id, hashesToRemove)
+  
+  elif args["delete"]:
+    # data [options] set delete <name-or-id>
+    dataset = authority.fetch_dataset(args['<name-or-id>'])

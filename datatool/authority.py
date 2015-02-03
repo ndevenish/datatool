@@ -13,7 +13,7 @@ from six.moves import StringIO
 
 from .handlers import handler_for, CreateSetCommand, CreateFileCommand, \
                       SetPropertyCommand, AddFilesToSetCommand, \
-                      AddTagsCommand, RemoveTagsCommand
+                      AddTagsCommand, RemoveTagsCommand, RmFilesFromSetCommand
 from .datafile import DataFile
 from .dataset import Dataset
 from .util import first
@@ -119,6 +119,9 @@ class Authority(object):
       if not f.hashsum in self._data.files:
         self._apply_command(CreateFileCommand(f))
     self._apply_command(AddFilesToSetCommand(set_id, [x.hashsum for x in file_entries]))
+
+  def remove_files(self, set_id, file_hashes):
+    self._apply_command(RmFilesFromSetCommand(set_id, file_hashes))
 
   def add_tags(self, set_id, tags):
     if not self._data[set_id].tags.issuperset(tags):
