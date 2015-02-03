@@ -13,7 +13,8 @@ from six.moves import StringIO
 
 from .handlers import handler_for, CreateSetCommand, CreateFileCommand, \
                       SetPropertyCommand, AddFilesToSetCommand, \
-                      AddTagsCommand, RemoveTagsCommand, RmFilesFromSetCommand
+                      AddTagsCommand, RemoveTagsCommand, RmFilesFromSetCommand, \
+                      DeleteSetCommand
 from .datafile import DataFile
 from .dataset import Dataset
 from .util import first
@@ -74,6 +75,13 @@ class AuthorityData(object):
     else:
       raise KeyError("Instance not recognised")
 
+  def __delitem__(self, key):
+    del self.entries[key]
+    if key in self.datasets:
+      del self.datasets[key]
+    if key in self.files:
+      del self.files[key]
+
   def values(self):
     return self.entries.values()
 
@@ -108,6 +116,10 @@ class Authority(object):
     if name:
       self._apply_command(SetPropertyCommand(cmd.id, "name", name))
     return cmd.id
+
+  def delete_set(self, set_id):
+    assert set_id in self._data.entries
+    self._apply_command(DeleteSetCommand(set_id))
 
   def rename_set(self, set_id, new_name):
     #dataset = self._data.datasets[set_id]

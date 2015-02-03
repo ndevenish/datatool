@@ -64,6 +64,16 @@ class CreateSetCommand(Command):
   def __str__(self):
     return "[Create Set {}]".format(self.id)
 
+@handles("deleteset")
+class DeleteSetCommand(CreateSetCommand):
+  def __init__(self, cid):
+    super(DeleteSetCommand, self).__init__(cid)
+  def apply(self, auth):
+    del auth[self.id]
+  def __str__(self):
+    return "[Delete set {}]".format(self.id)
+
+
 @handles("createfile")
 class CreateFileCommand(Command):
   def __init__(self, entry):

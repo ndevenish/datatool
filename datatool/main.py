@@ -7,13 +7,14 @@ Usage:
   data [options] set addfiles <name-or-id> <file> [<file>...]
   data [options] set rmfiles <name-or-id> <file-or-hash> [<file-or-hash>...]
   data [options] set delete <name-or-id>
+  data [options] set rename <name-or-id> <name>
   data [options] tag [-d] (<name-or-id-or-file>) <tag> [<tag>...]
   data [options] tag [-d] --tag=<tag> [--tag=<tag>...] <name-or-id-or-file>...
   data [options] index <file> [<file>...]
   data [options] files [--wildcard] <name-or-id> [<tag> [<tag>...]]
   data [options] search <tag> [<tag>...]
   data [options] identify <file> [<file>...]
-  data [options] sets
+  data [options] sets [--all]
 
 Options:
   --authority=<auth>  Use a specific data authority
@@ -23,6 +24,7 @@ Options:
   -d, --delete        Remove given tags from a dataset instead of adding
   -1                  Output only one (filename, set) per line. For parsing.
   -w, --wildcard      Attempt to output filenames as wildcards
+  -a, --all           Show all entries, even empty ones
 
 Commands:
   set           Manipulate and create data sets
@@ -30,6 +32,7 @@ Commands:
   set addfiles  Add a set of files to a dataset
   set rmfiles   Remove files from a dataset
   set delete    Remove a dataset.
+  set rename    Name, or rename, a dataset
   tag           Add a tag (or list of tags) to a dataset, or a file, or several
   index         Explicitly add a set of files to the index
   files         Retrieve the file list for a specific data set
@@ -50,6 +53,9 @@ from .index import find_index, LocalFileIndex
 from .authority import find_authority, LocalFileAuthority
 from .util import first, get_wildcards
 from .datafile import FileInstance
+
+class ArgumentError(RuntimeError):
+  pass
 
 def find_sources(authority=None, index=None):
   if not authority:
@@ -130,7 +136,9 @@ def main(argv):
   elif args["identify"]:
     assert False
   elif args["sets"]:
-    sets = [x for x in authority._data.datasets.values() if x.files]
+    sets = authority._data.datasets.values()
+    if not args["--all"]:
+      sets = [x for x in sets if x.files]
     print_sets(sets)
   elif args["tag"]:
     tagees = args["<name-or-id-or-file>"]
@@ -195,7 +203,16 @@ def process_set(args, authority, index):
         assert false
         # (needs more thought)
     authority.remove_files(dataset.id, hashesToRemove)
-  
+
   elif args["delete"]:
     # data [options] set delete <name-or-id>
     dataset = authority.fetch_dataset(args['<name-or-id>'])
+    if not dataset:
+      #logger.error("Dataset {} does not exist!".format(args["<name-or-id>"]))
+      raise ArgumentError("Dataset {} does not exist!".format(args["<name-or-id>"]))
+    authority.delete_set(dataset.id)
+  elif args["rename"]:
+    dataset = authority.fetch_dataset(args['<name-or-id>'])
+    authority.rename_set(dataset.id, args["<name>"])
+  else:
+    raise RuntimeError("Unhandled set command!")
