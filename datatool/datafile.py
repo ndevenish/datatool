@@ -3,6 +3,7 @@
 import os
 import uuid
 import hashlib
+import glob
 
 from .util import first
 
@@ -15,6 +16,20 @@ def hashfile(filename):
       data = ofile.read(4096)
   return hasher.hexdigest()
 
+class _FileIndexStore(object):
+  path = None
+  entries = None
+
+  @classmethod
+  def isFile(cls, filename):
+    filename = os.path.abspath(filename)
+    path = os.path.dirname(filename)
+    if not cls.path == path:
+      cls.path = path
+      cls.entries = set(glob.glob(os.path.join(path, "*")))
+    return filename in cls.entries
+
+
 class DataFile(object):
   def __init__(self, _id, instances=None):
     self.id = _id
@@ -23,7 +38,9 @@ class DataFile(object):
     self.attrs = {}
 
   def can_read(self):
-    return any(os.path.isfile(x.filename) for x in self.instances)
+    #return any(os.path.isfile(x.filename) for x in self.instances)
+    return any(_FileIndexStore.isFile(x.filename) for x in self.instances)
+    
   
   def get_valid_instance(self):
     return first([x for x in reversed(self.instances) if os.path.isfile(x.filename)])
