@@ -37,6 +37,7 @@ class DataSetFileNavigator(object):
     return self._tags
 
   def tagged(self, name):
+    name = str(name)
     if name in [x.lower() for x in self._tags]:
       path = self._path + [name]
       return DataSetFileNavigator(self._dataset, [x for x in self._subset if name in [y.lower() for y in x.tags]], path)
