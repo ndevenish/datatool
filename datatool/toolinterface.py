@@ -42,7 +42,15 @@ class DataSetFileNavigator(object):
       return DataSetFileNavigator(self._dataset, [x for x in self._subset if name in [y.lower() for y in x.tags]], path)
     else:
       raise SubsetError("No entries in subset with tag or extension named '{}'".format(name))
-    
+  
+  def filter(self, names):
+    """Filter by a set of tags"""
+    if not names:
+      return self
+    names = set(names)
+    tag = names.pop()
+    return self.tagged(tag).filter(names)
+  
   def __getattr__(self, attr):
     """Allow addressing via tag"""
     attr = attr.lower()
