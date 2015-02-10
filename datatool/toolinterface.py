@@ -41,7 +41,7 @@ class DataSetFileNavigator(object):
       path = self._path + [name]
       return DataSetFileNavigator(self._dataset, [x for x in self._subset if name in [y.lower() for y in x.tags]], path)
     else:
-      raise SubsetError("No entries in subset with tag or extension named '{}'".format(attr))
+      raise SubsetError("No entries in subset with tag or extension named '{}'".format(name))
     
   def __getattr__(self, attr):
     """Allow addressing via tag"""
