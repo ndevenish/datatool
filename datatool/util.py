@@ -26,6 +26,12 @@ def get_wildcards(file_list):
         wildcards.append(os.path.join(dirname, "*"+extension))
         continue
       else:
+        # Need to narrow down beyond just extension.
+        prefix = os.path.commonprefix(files)
+        real_list = set(glob.glob(os.path.join(dirname, prefix+"*"+extension)))
+        if sublist == real_list:
+          wildcards.append(os.path.join(dirname, prefix+"*"+extension))
+          continue
         for filename in sublist:
           wildcards.append(os.path.join(dirname, filename))
   return wildcards
