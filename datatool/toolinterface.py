@@ -68,6 +68,9 @@ class DataSetFileNavigator(object):
     if attr in [x.lower() for x in self._tags]:
       return self.tagged(attr)      
     elif attr in [x.lower() for x in self._extensions]:
+      # Check that we have all filenames - without all, we can't tell if we are returning complete
+      if not all(x.get_valid_instance() for x in self._subset):
+        raise SubsetError("Do not have full file information for dataset {}; cannot narrow by extension".format(self._dataset.name))
       return DataSetFileNavigator(self._dataset, [x for x in self._subset if x.get_valid_instance().filename.lower().endswith(attr)], path)
     else:
       raise SubsetError("No entries in subset with tag or extension named '{}'".format(attr))
