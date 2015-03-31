@@ -15,7 +15,7 @@ from .handlers import handler_for, CreateSetCommand, CreateFileCommand, \
                       SetPropertyCommand, AddFilesToSetCommand, \
                       AddTagsCommand, RemoveTagsCommand, RmFilesFromSetCommand, \
                       DeleteSetCommand
-from .datafile import DataFile
+from .datafile import DataFile, FileInstance
 from .dataset import Dataset
 from .util import first
 
@@ -206,4 +206,28 @@ class LocalFileAuthority(Authority):
         logger.debug("Writing: " + line.strip())
         stream.write(line)
       self._commandindex = len(self._commands)
+
+class RemoteDeploymentAuthority(Authority):
+  def __init__(self, filename):
+    """Handles deployments where only a remote authority snapshot may be present"""
+    super(RemoteDeploymentAuthority, self).__init__()
+    self._parse_remote_authority(filename)
+
+  def _parse_remote_authority(self, filename):
+    for line in open(filename).readlines():
+      parts = line.split()
+      # Extract the metadata from this line
+      file_hashsum, dataset_name, file_name = parts[:3]
+      file_tags = parts[3:]
+      # Retrieve or create a dataset with this name
+      dataset = self.fetch_dataset(dataset_name)
+      if not dataset:
+        dataset = self[self.create_set(name=dataset_name)]
+      # Add this file
+      fileinstance = FileInstance(filename=file_name, hashsum=file_hashsum)
+      self.add_files(dataset.id, [fileinstance])
+      self.add_tags(fileinstance.hashsum, file_tags)
+      # Explicitly add an instance of this file
+      self._data.files[fileinstance.hashsum].instances.append(fileinstance)
+
 

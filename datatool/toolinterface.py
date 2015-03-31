@@ -1,8 +1,10 @@
 import os
 import itertools
+import logging
+logger = logging.getLogger("datatool.interface")
 
 from .index import find_index, LocalFileIndex
-from .authority import find_authority, LocalFileAuthority
+from .authority import find_authority, LocalFileAuthority, RemoteDeploymentAuthority
 from .util import first
 
 class MissingDatafileError(IOError):
@@ -30,7 +32,14 @@ class DataSetFileNavigator(object):
   def only(self):
     if len(self._subset) > 1:
       raise SubsetError("More than one entry for selected subset; {}".format(",".join(self.all)))
-    return first(self._subset).get_valid_instance().filename
+    to_return = first(self._subset)
+    instance = to_return.get_valid_instance()
+    if not instance:
+      raise SubsetError("No valid instance for subset; {}".format(",".join(self.all)))
+    dataset_name = self._dataset.name
+    tags = self._tags
+    logger.info("{} {:15} {} {}".format(to_return.id, dataset_name, instance.filename, " ".join(tags)))
+    return instance.filename
 
   @property
   def tags(self):
@@ -77,6 +86,9 @@ class DatasetInterface(object):
   def __init__(self, dataset):
     self._dataset = dataset
 
+  @property
+  def name(self):
+    return self._dataset.name or self._dataset.id
 
   def _filenames(self):
     for filei in self._dataset.files:
@@ -104,10 +116,13 @@ class DatasetInterface(object):
 
 
 class Datatool(object):
-  def __init__(self):
-    self._authority = LocalFileAuthority(find_authority())
-    index = LocalFileIndex(find_index())
-    self._authority.apply_index(index)
+  def __init__(self, remote=None):
+    if remote is not None:
+      self._authority = RemoteDeploymentAuthority(remote)
+    else:
+      self._authority = LocalFileAuthority(find_authority())
+      index = LocalFileIndex(find_index())
+      self._authority.apply_index(index)
 
   def get_dataset(self, name_or_id):
     """Retrieves a particular dataset"""
