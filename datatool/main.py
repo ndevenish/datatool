@@ -111,7 +111,7 @@ def main(argv):
       elif not datafile.instances:
         entries.append((datafile.id, "(no meta)", datafile.tags))
       else:
-        entries.append(first(datafile.instances).filename, "(no read)", datafile.tags)
+        entries.append((first(datafile.instances).filename, "(no read)", datafile.tags))
     if entries:
       if args["--wildcard"]:
         # Only use filenames, and reduce the list
