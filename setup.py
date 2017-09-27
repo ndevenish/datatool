@@ -6,6 +6,10 @@ setup(name="datatool",
       author="Nicholas Devenish",
       author_email="ndevenish@gmail.com",
       packages=['datatool'],
-      scripts=['bin/data'],
+      entry_points = {
+        'console_scripts': [
+          'data=datatool.main:main',
+        ],
+    },
       install_requires=["docopt", "python-dateutil"],
      )

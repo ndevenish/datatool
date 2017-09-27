@@ -84,7 +84,11 @@ def print_sets(sets):
       "(no read)" if not dataSet.can_read() else " "*9, str(len(dataSet.files)).rjust(lenlen),
       tagMessage))
 
-def main(argv):
+def main():
+  "setup.py entry_points main"
+  sys.exit(run_main(sys.argv))
+
+def run_main(argv):
   args = docopt(__doc__, argv=argv[1:])
 
   # Find the data index file
