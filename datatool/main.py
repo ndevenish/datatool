@@ -74,7 +74,7 @@ def print_sets(sets):
   if len(sets) == 0:
     print("(no sets)")
     return
-  nameLen = max(len(x.name) for x in sets)
+  nameLen = max(len(x.name or "") for x in sets)
   lenlen = max(len(str(len(x.files))) for x in sets)
   for dataSet in sets:
     tagMessage = ""
