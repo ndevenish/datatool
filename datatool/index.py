@@ -14,6 +14,8 @@ from six.moves import StringIO
 from collections import namedtuple
 logger = logging.getLogger(__name__)
 
+from tqdm import tqdm
+
 from .datafile import hashfile, FileInstance
 from .util import first
 
@@ -77,7 +79,7 @@ class Index(object):
   def add_files(self, filenames):
     files = []
     # Look for this file in the index
-    for filename in [os.path.abspath(x) for x in filenames]:
+    for filename in tqdm([os.path.abspath(x) for x in filenames]):
       if filename in self._names:
         files.append(self._update_if_required(filename))
       else:

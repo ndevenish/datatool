@@ -42,6 +42,8 @@ Commands:
 """
 
 from __future__ import print_function
+import itertools
+import glob
 import sys, os
 import logging
 logger = logging.getLogger(__name__)
@@ -90,6 +92,10 @@ def main():
 
 def run_main(argv):
   args = docopt(__doc__, argv=argv[1:])
+
+  # Allow globs to be passed in as filenames (gets around argument length)
+  for filearg in ["<file>", "<file-or-hash>", "<name-or-id-or-file>"]:
+      args[filearg] = itertools.chain(*(glob.glob(x) for x in args.get(filearg, [])))
 
   # Find the data index file
   authority_name, index_name = find_sources(args["--authority"], args["--index"])

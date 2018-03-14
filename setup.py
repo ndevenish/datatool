@@ -11,5 +11,5 @@ setup(name="datatool",
           'data=datatool.main:main',
         ],
     },
-      install_requires=["docopt", "python-dateutil"],
+      install_requires=["docopt", "python-dateutil", "tqdm"],
      )
