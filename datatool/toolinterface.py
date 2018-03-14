@@ -27,7 +27,7 @@ class DataSetFileNavigator(object):
   @property
   def all(self):
     return [x.get_valid_instance().filename for x in self._subset]
-  
+
   @property
   def only(self):
     if len(self._subset) > 1:
@@ -52,7 +52,7 @@ class DataSetFileNavigator(object):
       return DataSetFileNavigator(self._dataset, [x for x in self._subset if name in [y.lower() for y in x.tags]], path)
     else:
       raise SubsetError("No entries in subset with tag or extension named '{}'".format(name))
-  
+
   def filter(self, names):
     """Filter by a set of tags"""
     if not names:
@@ -60,13 +60,13 @@ class DataSetFileNavigator(object):
     names = set(names)
     tag = names.pop()
     return self.tagged(tag).filter(names)
-  
+
   def __getattr__(self, attr):
     """Allow addressing via tag"""
     attr = attr.lower()
     path = self._path + [attr]
     if attr in [x.lower() for x in self._tags]:
-      return self.tagged(attr)      
+      return self.tagged(attr)
     elif attr in [x.lower() for x in self._extensions]:
       # Check that we have all filenames - without all, we can't tell if we are returning complete
       if not all(x.get_valid_instance() for x in self._subset):

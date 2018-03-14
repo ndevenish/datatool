@@ -1,4 +1,4 @@
-# coding: utf-8
+# coding: utf-8
 
 import os
 import uuid
@@ -15,7 +15,7 @@ class Dataset(object):
   @property
   def name(self):
       return self.attrs.get("name")
-  
+
   def can_read(self):
     """Can all files be read?"""
     return all(x.can_read() for x in self.files)
@@ -27,4 +27,3 @@ class Dataset(object):
     return "<Dataset {}:{} files, [{}]>".format(self.id, len(self.files), ",".join(self.tags))
 
 
-  

@@ -10,13 +10,13 @@ def first(it):
 def get_wildcards(file_list):
   """Turns a list of files into a wildcard/list of wildcards."""
   wildcards = []
-  # Filter out all separate directories
+  # Filter out all separate directories
   files = collections.defaultdict(set)
   for filename in file_list:
     d, f = os.path.split(filename)
     files[d].add(f)
 
-  # Now, process each directory separately
+  # Now, process each directory separately
   for dirname, files in files.iteritems():
     extensions = {os.path.splitext(x)[1] for x in files}
     for extension in extensions:

@@ -47,7 +47,7 @@ class Command(object):
   @timestamp.setter
   def timestamp(self, value):
       self._timestamp = value
-  
+
 @handles("createset")
 class CreateSetCommand(Command):
   def __init__(self, cid=None):

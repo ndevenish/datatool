@@ -1,4 +1,4 @@
-# coding: utf-8
+# coding: utf-8
 
 """Manages and reads the data authority"""
 

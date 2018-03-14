@@ -1,4 +1,4 @@
-# coding: utf-8
+# coding: utf-8
 
 import os
 import uuid
@@ -40,8 +40,8 @@ class DataFile(object):
   def can_read(self):
     #return any(os.path.isfile(x.filename) for x in self.instances)
     return any(_FileIndexStore.isFile(x.filename) for x in self.instances)
-    
-  
+
+
   def get_valid_instance(self):
     return first([x for x in reversed(self.instances) if os.path.isfile(x.filename)])
 
@@ -59,7 +59,7 @@ class FileInstance(object):
   @classmethod
   def from_file(cls, filename):
     stats = os.stat(filename)
-    return FileInstance(filename, hashsum=hashfile(filename), 
+    return FileInstance(filename, hashsum=hashfile(filename),
                     size=stats.st_size, timestamp=stats.st_mtime)
 
   def to_data(self):

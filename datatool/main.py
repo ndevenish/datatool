@@ -93,7 +93,7 @@ def main():
 def run_main(argv):
   args = docopt(__doc__, argv=argv[1:])
 
-  # Allow globs to be passed in as filenames (gets around argument length)
+  # Allow globs to be passed in as filenames (gets around argument length)
   for filearg in ["<file>", "<file-or-hash>", "<name-or-id-or-file>"]:
       args[filearg] = itertools.chain(*(glob.glob(x) for x in args.get(filearg, [])))
 
@@ -114,7 +114,7 @@ def run_main(argv):
     for datafile in dataset.files:
       # Find the last instance that exists
       valid = datafile.get_valid_instance()
-      # Check that this file contains all the tags passed in 
+      # Check that this file contains all the tags passed in
       if not tagfilter.issubset(set(x.lower() for x in datafile.tags)):
         continue
       if valid:
@@ -159,7 +159,7 @@ def run_main(argv):
       if not tagee:
         tagee = authority.fetch_dataset(tageeName)
       if not tagee:
-        # Look for this in the index
+        # Look for this in the index
         fileEntry = index.fetch_file(tageeName)
         if fileEntry:
           tagee = authority._data.get(fileEntry.hashsum)
@@ -195,7 +195,7 @@ def process_set(args, authority, index):
     dataset = authority.fetch_dataset(args['<name-or-id>'])
     hashesToRemove = []
     for toRemove in args["<file-or-hash>"]:
-      # Find the file instance and remove it
+      # Find the file instance and remove it
       # Look for this file already
       filei = index.fetch_file(toRemove)
       if filei in dataset.files:
