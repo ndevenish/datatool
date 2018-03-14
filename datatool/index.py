@@ -78,8 +78,9 @@ class Index(object):
 
   def add_files(self, filenames):
     files = []
-    # Look for this file in the index
-    for filename in tqdm([os.path.abspath(x) for x in filenames]):
+    # Look for these files in the index
+    for filename in tqdm([os.path.abspath(x) for x in filenames], leave=False):
+      tqdm.write("Indexing {}".format(filename))
       if filename in self._names:
         files.append(self._update_if_required(filename))
       else:

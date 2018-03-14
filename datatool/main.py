@@ -106,9 +106,7 @@ def run_main(argv):
   if args["set"]:
     process_set(args, authority, index)
   elif args["index"]:
-    for f in args["<file>"]:
-      logger.info("Indexing {}".format(f))
-      index.add_files([f])
+    index.add_files(args["<file>"])
   elif args["files"]:
     dataset = authority.fetch_dataset(args['<name-or-id>'])
     tagfilter = set(x.lower() for x in args["<tag>"])
