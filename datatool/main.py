@@ -95,7 +95,7 @@ def run_main(argv):
 
   # Allow globs to be passed in as filenames (gets around argument length)
   for filearg in ["<file>", "<file-or-hash>", "<name-or-id-or-file>"]:
-      args[filearg] = itertools.chain(*(glob.glob(x) for x in args.get(filearg, [])))
+      args[filearg] = list(itertools.chain(*(glob.glob(x) for x in args.get(filearg, []))))
 
   # Find the data index file
   authority_name, index_name = find_sources(args["--authority"], args["--index"])
