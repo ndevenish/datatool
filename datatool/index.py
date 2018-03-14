@@ -28,7 +28,7 @@ def entry_for_file(filename):
   size, timestamp = (fileData.st_size, fileData.st_mtime)
   sha = hashfile(filename)
   return IndexEntry(datetime.datetime.utcnow(), sha, timestamp, size, filename)
-  
+
 class IndexFileError(IOError):
   pass
 

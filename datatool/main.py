@@ -63,12 +63,12 @@ def find_sources(authority=None, index=None):
   if not authority:
     authority = find_authority()
   if not (authority):
-    logger.error("No data authority specified. Please set DATA_AUTHORITY or pass in with --authority")
+    logger.error("No data authority specified. Please set DATA_AUTHORITY or pass in with --authority (or create blank ~/.data.authority)")
     sys.exit(2)
   if not index:
     index = find_index()
   if not (index):
-    logger.error("No data index specified. Please set DATA_INDEX or pass in with --index")
+    logger.error("No data index specified. Please set DATA_INDEX or pass in with --index (or create blank ~/.data.index)")
     sys.exit(2)
   return (authority, index)
 

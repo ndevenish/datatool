@@ -19,7 +19,7 @@ from .datafile import DataFile, FileInstance
 from .dataset import Dataset
 from .util import first
 
-# Look for a non-blank line 
+# Look for a non-blank line
 reLineHeader = re.compile(r'^\s*([^\s]+)\s+(\w+)\s+(.*)$')
 
 def find_authority():
@@ -28,6 +28,10 @@ def find_authority():
   for loc in [os.path.expanduser(x) for x in locs if x]:
     if os.path.isfile(loc):
       return loc
+    elif os.path.isdir(loc):
+      path = os.path.join(loc, "data.authority")
+      if os.path.isfile(path):
+        return path
   return None
 
 
