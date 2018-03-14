@@ -1,4 +1,4 @@
-# coding: utf-8
+# coding: utf-8
 
 import json
 from datatool.authority import StringAuthority
@@ -17,7 +17,7 @@ def testBasicSetCreate():
   cid = idx.create_set("newset")
   idx.rename_set(cid, "old_newset")
   logger.debug("Creating set {}".format(cid))
-  # Dump out everything
+  # Dump out everything
   for cmd in idx._commands:
     logger.debug("{} {} {}".format(cmd.timestamp.isoformat(),cmd.command,json.dumps(cmd.to_data())))
   idx.write(data)
